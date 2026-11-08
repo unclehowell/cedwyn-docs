@@ -469,6 +469,10 @@ def main():
     if OUT.exists() and not only:
         shutil.rmtree(OUT)
     OUT.mkdir(exist_ok=True)
+    store = ROOT / 'data' / 'central.json'   # the webapp's own data store (tools/sync_central.py); public/ is build output
+    if store.is_file():
+        (OUT / 'data').mkdir(exist_ok=True)
+        shutil.copy2(store, OUT / 'data' / 'central.json')
     # documents are independent Sphinx runs: build them side by side (one per CPU); the order of entries is kept
     from concurrent.futures import ThreadPoolExecutor
     with ThreadPoolExecutor(max_workers=int(os.environ.get('DOCS_JOBS', 0)) or os.cpu_count() or 2) as pool:

@@ -1,0 +1,59 @@
+#!/usr/bin/env python3
+"""Fill this webapp's own data store, data/central.json, with only the central-catalogue fields the docs pages show.
+Read-only against the central catalogue. data/central.json is a derived cache: never edit it by hand; the central catalogue
+stays the single source of truth. The file is rewritten only when a record it holds changed.
+Docs / Evidence Catalogue (/docs/): the record IDs come from the document sources (ghf_*/**/*.rst and ghf_*/**/*.json, which
+includes each document's doc.json), so a record cited later is picked up on the next run with no hand-kept list.
+public/ is build output (gitignored, rebuilt by _theme-docs/build.py), so the store lives at data/central.json and build.py
+copies it to public/data/central.json, served at /docs/data/central.json.
+The catalogue is read as a few paged list requests (/api/catalogue?limit=500&offset=N), not one request per ID, to keep the
+load on the central catalogue small. An ID that is not in the catalogue is listed under not_in_central. If the listing cannot be
+read whole (a page fails, or it returns fewer rows than its own total), the store is left as it was.
+Run by .github/workflows/sync-central.yml every 6 hours. — Sion's Tab agent"""
+import json, re, sys, time, datetime, pathlib, urllib.request
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+API = 'https://cedwyn.bucklerfamily.estate/api/catalogue'
+FIELDS = ('id', 'kind', 'title', 'date_display', 'date_sort', 'status', 'page')
+NEEDS = ['ghf_*/**/*.rst', 'ghf_*/**/*.json']   # where this webapp's record IDs live (globs)
+SKIP = ('.git/', '.github/', '_theme-docs/', 'public/')   # path prefixes never scanned
+OUT = ROOT / 'data' / 'central.json'   # copied to public/data/central.json by _theme-docs/build.py
+ids = set()
+for g in NEEDS:
+    for f in sorted(ROOT.glob(g)):
+        if not f.is_file() or f.resolve() == OUT.resolve(): continue   # never read the store itself
+        rel = f.relative_to(ROOT).as_posix()
+        if rel.startswith(SKIP) or '/build/' in rel: continue
+        ids |= set(re.findall(r'\b(?:EV|MR|AR)-\d{4}\b', f.read_text(encoding='utf-8', errors='replace')))
+cat, total, off = {}, None, 0
+try:
+    while True:
+        req = urllib.request.Request(f'{API}?limit=500&offset={off}', headers={'User-Agent': 'cedwyn-webapp-sync/1.1'})
+        page = json.load(urllib.request.urlopen(req, timeout=60))
+        rows = page.get('items') or []
+        total = page.get('total', total)
+        for it in rows:
+            if it.get('id'): cat[it['id']] = {k: it.get(k) for k in FIELDS}
+        off += len(rows)
+        if not rows or (total is not None and off >= total): break
+        time.sleep(1)
+except Exception as e:
+    sys.exit(f'catalogue listing could not be read ({e}); data/central.json left as it was')
+if total is None or len(cat) < total:
+    sys.exit(f'catalogue listing incomplete ({len(cat)} of {total}); data/central.json left as it was')
+items = {i: cat[i] for i in sorted(ids) if i in cat}
+miss = sorted(i for i in ids if i not in cat)
+prev = {}
+try: prev = json.loads(OUT.read_text(encoding='utf-8'))
+except Exception: pass
+if prev.get('items') == items and prev.get('not_in_central') == miss:
+    print('no change', len(items)); sys.exit(0)
+doc = {
+    'source': API,
+    'note': "This webapp's own data store: the central-catalogue fields for the record IDs cited in "
+            + 'the document sources (' + ', '.join(NEEDS) + ')' + '. Derived and read-only; never edit by hand (tools/sync_central.py rewrites it).',
+    'fields': list(FIELDS),
+    'synced_utc': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
+    'count': len(items), 'not_in_central': miss, 'items': items}
+OUT.parent.mkdir(parents=True, exist_ok=True)   # first run: data/ may not exist yet
+OUT.write_text(json.dumps(doc, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
+print('written', len(items), 'missing', len(miss), 'catalogue rows', len(cat))

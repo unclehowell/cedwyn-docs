@@ -28,7 +28,7 @@ Record
 
 **Quotation:** “an application has been captured internally by HM Land Registry to investigate and correct any error that may have been made. Please note the application reference – Z084NQV” (HMLR, 10 Oct 2026, `M77 <#m77>`__). This is a procedural step, not a finding of error.
 
-**Proves:** What was sent and received, by whom and on what dates, as held in Sion’s mailbox.
+**Proves:** What was sent and received, by whom and on what dates, as held in the project mailbox.
 
 **Does not prove:** That any statement inside an email is true; that the mailbox holds every message (letters, calls and other addresses are outside it); any motive.
 

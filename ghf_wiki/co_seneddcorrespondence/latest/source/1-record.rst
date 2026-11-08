@@ -24,7 +24,7 @@ Record
 
 `About this page type → Read the Docs <https://research.bucklerfamily.estate/read-the-docs/#ev-pages>`__
 
-**Proves:** What was sent and received, by whom and on what dates, as held in Sion’s mailbox.
+**Proves:** What was sent and received, by whom and on what dates, as held in the project mailbox.
 
 **Does not prove:** That any statement inside an email is true; that the mailbox holds every message (letters, calls and other addresses are outside it); any motive.
 

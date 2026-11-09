@@ -370,6 +370,16 @@ def band(label, buttons, cls=''):
     return f'<section class="band {cls}"><h2 class="title-line">{label}</h2><div class="btns">{"".join(buttons)}</div></section>'
 
 
+# 9 Nov 2026: one central catalogue of artifacts and evidence (owner, WhatsApp 22:44 GMT 8 Nov 2026: "I only need one central
+# catalouge of artifacts/ evidence. One."). The Evidence register and Media register collection pages are "Coming soon" pages that
+# link to bucklerfamily.estate/catalogue/; every record is there. The per-document pages are still built. Same page as the live
+# hot patch on cedwyn@site (ad9ab21). - Sion's Tab agent
+COMING_SOON = {
+    'ghf_evidence': '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Coming soon · Docs · Evidence register · Cedwyn</title><meta name="description" content="Docs · Evidence register: coming soon. Records are in the one central catalogue at bucklerfamily.estate/catalogue/."><meta name="robots" content="noindex"><meta name="color-scheme" content="light"><meta name="theme-color" content="#1e4d45"><style>body.cs{margin:0;background:#f4f1ea;color:#1b1b1b;font:16px/1.5 Georgia,\'Times New Roman\',serif}.cs-w{max-width:640px;margin:0 auto;padding:18vh 20px 24vh;text-align:center}.cs-w h1{font:400 clamp(32px,9vw,52px)/1.15 \'Palatino Linotype\',\'Book Antiqua\',Georgia,serif;margin:0 0 12px;letter-spacing:.03em}.cs-w p{margin:0;color:#5a5a5a;letter-spacing:.12em;text-transform:uppercase;font-size:13px}</style></head>\n<body class="cs">\n<main class="cs-w" data-coming-soon="docs-ghf_evidence"><h1>Coming soon</h1><p>Docs · Evidence register</p><p style="text-transform:none;letter-spacing:0;margin-top:18px;font-size:16px">Every record is in the one catalogue: <a href="https://bucklerfamily.estate/catalogue/">bucklerfamily.estate/catalogue/</a></p></main><!-- One central catalogue of artifacts and evidence; nothing was deleted. Source: bucklerfamily.estate/catalogue/ (records read from /api/catalogue). --><script>(function(){var n=0;(function t(){var b=document.querySelector(".ghf-v2-name b");if(b&&b.textContent!=="Coming soon")b.textContent="Coming soon";if(++n<60)setTimeout(t,250);})();})();</script>\n</body></html>\n',
+    'ghf_research': '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Coming soon · Docs · Media register · Cedwyn</title><meta name="description" content="Docs · Media register: coming soon. Records are in the one central catalogue at bucklerfamily.estate/catalogue/."><meta name="robots" content="noindex"><meta name="color-scheme" content="light"><meta name="theme-color" content="#1e4d45"><style>body.cs{margin:0;background:#f4f1ea;color:#1b1b1b;font:16px/1.5 Georgia,\'Times New Roman\',serif}.cs-w{max-width:640px;margin:0 auto;padding:18vh 20px 24vh;text-align:center}.cs-w h1{font:400 clamp(32px,9vw,52px)/1.15 \'Palatino Linotype\',\'Book Antiqua\',Georgia,serif;margin:0 0 12px;letter-spacing:.03em}.cs-w p{margin:0;color:#5a5a5a;letter-spacing:.12em;text-transform:uppercase;font-size:13px}</style></head>\n<body class="cs">\n<main class="cs-w" data-coming-soon="docs-ghf_research"><h1>Coming soon</h1><p>Docs · Media register</p><p style="text-transform:none;letter-spacing:0;margin-top:18px;font-size:16px">Every record is in the one catalogue: <a href="https://bucklerfamily.estate/catalogue/">bucklerfamily.estate/catalogue/</a></p></main><!-- One central catalogue of artifacts and evidence; nothing was deleted. Source: bucklerfamily.estate/catalogue/ (records read from /api/catalogue). --><script>(function(){var n=0;(function t(){var b=document.querySelector(".ghf-v2-name b");if(b&&b.textContent!=="Coming soon")b.textContent="Coming soon";if(++n<60)setTimeout(t,250);})();})();</script>\n</body></html>\n',
+}
+
+
 def render_menus(index, entries):
     esc = _html.escape
     colls = index['collections']
@@ -399,6 +409,8 @@ def render_menus(index, entries):
         if c['id'] == 'ghf_legalwiki':   # 27 Oct 2026: the 1987 Court of Appeal video comes first on the Legal Wiki (muted autoplay, minimal controls) - Sion's Tab agent
             body = LEGALWIKI_VIDEO + body
         menu_page(OUT / c['id'] / 'index.html', f'{_t(c["title"])} · docs', body, 1)
+        if c['id'] in COMING_SOON:
+            (OUT / c['id'] / 'index.html').write_text(COMING_SOON[c['id']], encoding='utf-8')
     # document: the document's title, then one band per language: Latest (HTML, green) and older versions (PDF, red) to its right
     for e in entries:
         rows = ''

@@ -366,6 +366,19 @@ LEGALWIKI_VIDEO = ('<section class="band vid"><div class="vid-w"><iframe id="lw-
     '<button type="button" class="vid-snd" onclick="var f=document.getElementById(\'lw-vid\');f.contentWindow.postMessage(JSON.stringify({event:\'command\',func:this.dataset.on?\'mute\':\'unMute\',args:[]}),\'*\');'
     'if(this.dataset.on){delete this.dataset.on;this.textContent=\'Sound on\'}else{this.dataset.on=1;this.textContent=\'Sound off\'}">Sound on</button></div></section>')
 
+# 11 Nov 2026 (owner, WhatsApp 08:10 GMT: "Normally the lowest count one with a 'coming soon' is the number to un assign to the
+# coming soon webapp and assign to a newly introduced webapp ... add it to the docs/html webapp docs for this website"): the docs
+# home page explains how webapps are numbered (cedwyn docs/NAV.md carries the same rule for agents). - Sion's Tab agent
+WEBAPP_NUMBERING = ('<section class="band" id="webapp-numbering"><h2 class="title-line">Webapp numbering</h2><div class="note">'
+    '<p>Every webapp on this site has its own number, shown as &ldquo;N of 59&rdquo; in the bar at the top of the page. '
+    'The &lsaquo; and &rsaquo; arrows step through them in order, and the loop always runs 1 to 59: &rsaquo; on 59 opens 1, '
+    'and &lsaquo; on 1 opens 59.</p>'
+    '<p>A number with no webapp yet holds a &ldquo;Coming soon&rdquo; page.</p>'
+    '<p><b>A new webapp takes the lowest-numbered Coming soon slot; that slot stops being Coming soon.</b> '
+    'No two webapps share a number, and a webapp keeps its number once it has one.</p>'
+    '<p>Example: the Preservation register took slot 56, the lowest Coming soon slot at the time. Slots 57 to 59 are still Coming soon.</p>'
+    '</div></section>')
+
 def band(label, buttons, cls=''):
     return f'<section class="band {cls}"><h2 class="title-line">{label}</h2><div class="btns">{"".join(buttons)}</div></section>'
 
@@ -391,6 +404,7 @@ def render_menus(index, entries):
     for sub, cs in groups.items():
         body += band(esc(_t(cs[0]['subsidiary_title'])),
                      [f'<a class="btn" href="/{c["id"]}/">{esc(_t(c["title"]))}</a>' for c in cs])
+    body += WEBAPP_NUMBERING
     menu_page(OUT / 'index.html', 'Docs · bucklerfamily.estate', body, 0,
               'Documents of the Buckler family estate: pick a category, then a document; each language reads online, older versions are PDFs.')
     # collection: one band per document group (the part of the document id before "_"), one button per document

@@ -407,6 +407,11 @@ def render_menus(index, entries):
     body += WEBAPP_NUMBERING
     menu_page(OUT / 'index.html', 'Docs · bucklerfamily.estate', body, 0,
               'Documents of the Buckler family estate: pick a category, then a document; each language reads online, older versions are PDFs.')
+    # 11 Nov 2026: the home page is a menu plus the 'Webapp numbering' note; the site-wide reader (cw-graph.js clip/levels) must not
+    # fold it into one 'Read more' card (live 09:35Z it hid the buttons), so the home page opts out on its <html>. - Sion's Tab agent
+    _home = OUT / 'index.html'
+    _home.write_text(_home.read_text(encoding='utf-8').replace('<html lang="en" data-ghf-native="auto">',
+                     '<html lang="en" data-ghf-native="auto" data-cw-noclip data-cw-nolevels>', 1), encoding='utf-8')
     # collection: one band per document group (the part of the document id before "_"), one button per document
     for c in colls:
         docs = [e for e in entries if e['collection'] == c['id']]

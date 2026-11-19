@@ -326,10 +326,10 @@ def _t(obj, lang='en'):
     return obj.get(lang) or obj.get('en') or next(iter(obj.values()), '') if isinstance(obj, dict) else str(obj)
 
 
-def menu_page(path, title, body, depth, desc=''):
+def menu_page(path, title, body, depth, desc='', up_href=None):
     """One static menu page in the library's explorer layout (translucent bands, rounded buttons), no JS needed; family day/night colours."""
     esc = _html.escape
-    up = '' if depth == 0 else '<a class="up" href="../" aria-label="Back">&laquo;</a>'
+    up = '' if depth == 0 else f'<a class="up" href="{esc(up_href or "../")}" aria-label="Back">&laquo;</a>'
     rel = '../' * depth
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(f"""<!DOCTYPE html>
@@ -349,6 +349,66 @@ def menu_page(path, title, body, depth, desc=''):
 <main class="lib">
 {up}{body}
 </main>
+</body>
+</html>
+""", encoding='utf-8')
+
+
+def dashboard_page(path):
+    """Visual-only home for the Docs webapp. All values are loaded from this build's docs.json and read-only data/central.json."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(f"""<!doctype html>
+<html lang="en" data-ghf-native="auto" data-cw-noclip data-cw-nolevels>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Docs catalogue metadata dashboard.">
+<meta name="theme-color" content="#0d131a">
+<title>Docs · Overview</title>
+<link rel="alternate" type="application/json" href="docs.json" title="Document index">
+<link rel="stylesheet" href="dashboard.css">
+<script src="dashboard.js" defer></script>
+{GHF_BOOT}
+</head>
+<body>
+<div class="dash-shell">
+  <header class="dash-top">
+    <a class="dash-brand" href="./" aria-label="Docs dashboard">DOCS</a>
+    <nav class="dash-tools" aria-label="Docs navigation">
+      <a class="dash-action" href="browse/">BROWSE</a>
+    </nav>
+  </header>
+  <main class="dash-main">
+    <section class="dash-gauges" id="docs-gauges" aria-label="Metadata gauges"></section>
+    <div class="dash-grid">
+      <section class="dash-panel" aria-label="Documents by collection">
+        <h2>BY COLLECTION</h2><div class="dash-bars" id="docs-by-collection"></div>
+      </section>
+      <section class="dash-panel" aria-label="Documents by status">
+        <h2>STATUS</h2><div class="dash-bars" id="docs-by-status"></div>
+      </section>
+      <section class="dash-panel" aria-label="Language coverage">
+        <h2>LANGUAGE BUILDS</h2><div class="dash-bars" id="docs-by-language"></div>
+      </section>
+      <section class="dash-panel" aria-label="Central catalogue kinds">
+        <h2>CATALOGUE KIND</h2><div class="dash-bars" id="central-by-kind"></div>
+      </section>
+      <section class="dash-panel" aria-label="Archived editions by year">
+        <h2>ARCHIVE YEAR</h2><div class="dash-bars" id="archive-by-year"></div>
+      </section>
+      <section class="dash-panel wide" aria-label="Document update timeline">
+        <h2>UPDATED × COLLECTION</h2><div class="dash-scatter-scroll" id="docs-scatter"></div>
+      </section>
+    </div>
+    <div class="dash-source">
+      <span id="dash-build">INDEX —</span><span id="dash-central">CENTRAL —</span><span class="dash-state" id="dash-state">DATA</span>
+    </div>
+  </main>
+</div>
+<dialog class="dash-dialog" id="docs-dialog" aria-label="Docs">
+  <div class="dash-dialog-head"><span class="dash-dialog-label">DOCS</span><button class="dash-close" id="docs-close" type="button" aria-label="Close">×</button></div>
+  <a class="dash-docs-url" href="https://bucklerfamily.estate/docs/">https://bucklerfamily.estate/docs/</a>
+</dialog>
 </body>
 </html>
 """, encoding='utf-8')
@@ -405,13 +465,10 @@ def render_menus(index, entries):
         body += band(esc(_t(cs[0]['subsidiary_title'])),
                      [f'<a class="btn" href="/{c["id"]}/">{esc(_t(c["title"]))}</a>' for c in cs])
     body += WEBAPP_NUMBERING
-    menu_page(OUT / 'index.html', 'Docs · bucklerfamily.estate', body, 0,
-              'Documents of the Buckler family estate: pick a category, then a document; each language reads online, older versions are PDFs.')
-    # 11 Nov 2026: the home page is a menu plus the 'Webapp numbering' note; the site-wide reader (cw-graph.js clip/levels) must not
-    # fold it into one 'Read more' card (live 09:35Z it hid the buttons), so the home page opts out on its <html>. - Sion's Tab agent
-    _home = OUT / 'index.html'
-    _home.write_text(_home.read_text(encoding='utf-8').replace('<html lang="en" data-ghf-native="auto">',
-                     '<html lang="en" data-ghf-native="auto" data-cw-noclip data-cw-nolevels>', 1), encoding='utf-8')
+    # Keep the former category menu at /browse/; the root page is the visual metadata dashboard.
+    menu_page(OUT / 'browse' / 'index.html', 'Docs · Browse', body, 1,
+              'Browse the Docs collections and documents.')
+    dashboard_page(OUT / 'index.html')
     # collection: one band per document group (the part of the document id before "_"), one button per document
     for c in colls:
         docs = [e for e in entries if e['collection'] == c['id']]
@@ -427,7 +484,7 @@ def render_menus(index, entries):
                                       for e in es])
         if c['id'] == 'ghf_legalwiki':   # 27 Oct 2026: the 1987 Court of Appeal video comes first on the Legal Wiki (muted autoplay, minimal controls) - Sion's Tab agent
             body = LEGALWIKI_VIDEO + body
-        menu_page(OUT / c['id'] / 'index.html', f'{_t(c["title"])} · docs', body, 1)
+        menu_page(OUT / c['id'] / 'index.html', f'{_t(c["title"])} · docs', body, 1, up_href='../browse/')
         if c['id'] in COMING_SOON:
             (OUT / c['id'] / 'index.html').write_text(COMING_SOON[c['id']], encoding='utf-8')
     # document: the document's title, then one band per language: Latest (HTML, green) and older versions (PDF, red) to its right

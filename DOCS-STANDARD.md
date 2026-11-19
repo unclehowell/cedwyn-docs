@@ -118,12 +118,18 @@ python3 _theme-docs/release.py <collection>/<document> --to X.Y.Z [--date YYYY-M
 7.2 It carries, per document: id, collection, version, date, updated, author, status, title, summary, archive (versions), and per language:
     title, summary, html and archive (`[{version, date, pdf}]`, the wayback PDFs in that language); plus the collections with their labels,
     the archive base URL, the commit and the build time.
-7.3 The menus are built from it, in the library's journey and look: home = one band per subsidiary (the part of the collection id
-    before `_`, label `subsidiary_title`) with a button per collection; collection page = one band per document group (the part of the
-    document id before `_`, label from `groups`) with a button per document; document page = the document's title, then one band per
-    language: a green **Latest** button (HTML) and, to its right, a red button per older version (PDF in wayback, `X-Y-Z`). « goes up a level.
+7.3 The home page (`/`) is a metadata-only dashboard. It reads the generated `docs.json` index and this webapp's derived,
+    read-only `data/central.json` cache; it shows counts and metadata only (documents, collections, languages, archive editions,
+    central-catalogue matches and unmatched referenced IDs, category/status bars, language bars, kind bars and update-date plot).
+    The central-cache timestamp is shown separately from the docs-index build timestamp. No document summaries, source passages,
+    transcripts, or promotional/explanatory text appear on the dashboard. Selecting any gauge, bar or plot point opens the Docs
+    modal with the fixed address `https://bucklerfamily.estate/docs/`. Missing central metadata must not be treated as zero records.
+    The former collection landing menu lives at `/browse/`; its links remain the route into the collection and document menus.
+7.4 Collection pages use one band per document group (the part of the document id before `_`, label from `groups`) with a
+    button per document. Document pages show the document title and one band per language: a green **Latest** button (HTML)
+    and, to its right, a red button per older version (PDF in wayback, `X-Y-Z`). « goes up a level.
 
-7.4 **PDFs open in a dialog.** Every link to a PDF (the red version buttons in the menus, "This version (PDF)" and older versions in
+7.5 **PDFs open in a dialog.** Every link to a PDF (the red version buttons in the menus, "This version (PDF)" and older versions in
     the sidebar, PDF links in the text) opens the wayback file in an in-page dialog drawn with pdf.js (`_static/docs-modal.js`,
     also loaded by the menus): close button, Esc or a tap outside closes it, full height on a phone, and "Open in new tab" beside
     it. The files themselves stay in wayback (§2.8); without JavaScript the link opens the file as before.

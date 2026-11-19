@@ -233,7 +233,7 @@
       var rows=Object.keys(langs).sort().map(function(code){return {primary:code.toUpperCase(),secondary:"DOCUMENT LANGUAGE BUILDS",value:fmt(langs[code])};});
       showDetail("LANGUAGES",fmt(rows.length),"Distinct language codes present in the document index; each count is a document-language build.",rows);
     }else if(key==="archives"){
-      var rows=archives.map(function(item){return {primary:item.doc.id+" · "+item.doc.title,secondary:"ARCHIVE v"+String(item.archive.version||"—")+" · PDF LANGUAGES "+((item.archive.languages||[]).join(", ")||"—"),value:item.archive.date||"—",href:(item.doc.languages||[])[0]&&(item.doc.languages||[])[0].html};});
+      var rows=archives.map(function(item){return {primary:item.doc.id+" · "+item.doc.title,secondary:"ARCHIVE v"+String(item.archive.version||"—")+" · PDF LANGUAGES "+((item.archive.languages||[]).join(", ")||"—"),value:item.archive.date||"—"};});
       showDetail("ARCHIVED EDITIONS",fmt(archives.length),"Archived edition metadata grouped by source document; dates, versions and available PDF languages.",rows);
     }else if(key==="linked"){
       if(!current.central||!current.central.items||typeof current.central.items!=="object"){
@@ -274,7 +274,7 @@
     }else if(type==="archive-year"){
       selected=allArchives.filter(function(item){return item.year===key;});
       title="ARCHIVE YEAR · "+key;stat=selected.length;note="Archived editions dated in this year.";
-      rows=selected.map(function(item){return {primary:item.doc.id+" · "+item.doc.title,secondary:"ARCHIVE v"+String(item.archive.version||"—")+" · PDF LANGUAGES "+((item.archive.languages||[]).join(", ")||"—"),value:item.archive.date||"—",href:(item.doc.languages||[])[0]&&(item.doc.languages||[])[0].html};});
+      rows=selected.map(function(item){return {primary:item.doc.id+" · "+item.doc.title,secondary:"ARCHIVE v"+String(item.archive.version||"—")+" · PDF LANGUAGES "+((item.archive.languages||[]).join(", ")||"—"),value:item.archive.date||"—"};});
     }
     showDetail(title||"METADATA DETAILS",fmt(stat),note,rows);
   }

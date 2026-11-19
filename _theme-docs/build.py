@@ -405,9 +405,21 @@ def dashboard_page(path):
     </div>
   </main>
 </div>
-<dialog class="dash-dialog" id="docs-dialog" aria-label="Docs">
-  <div class="dash-dialog-head"><span class="dash-dialog-label">DOCS</span><button class="dash-close" id="docs-close" type="button" aria-label="Close">×</button></div>
-  <a class="dash-docs-url" href="https://bucklerfamily.estate/docs/">https://bucklerfamily.estate/docs/</a>
+<dialog class="dash-dialog" id="docs-dialog" aria-labelledby="docs-detail-title">
+  <div class="dash-dialog-inner">
+    <div class="dash-dialog-head">
+      <div class="dash-dialog-heading">
+        <span class="dash-dialog-label" id="docs-detail-title">METADATA DETAILS</span>
+        <div class="dash-detail-stat" id="docs-detail-stat">—</div>
+        <p class="dash-detail-note" id="docs-detail-note"></p>
+      </div>
+      <button class="dash-close" id="docs-close" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="dash-detail-body">
+      <div class="dash-detail-count" id="docs-detail-count">0 ITEMS</div>
+      <div class="dash-detail-list" id="docs-detail-list" aria-live="polite"></div>
+    </div>
+  </div>
 </dialog>
 </body>
 </html>

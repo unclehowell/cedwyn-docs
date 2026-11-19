@@ -8,7 +8,7 @@ and [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Rules: DOCS-STAN
 
 ### Changed
 - Docs home (`/docs/`) is now a metadata-only dashboard from `docs.json` and the read-only central cache; the former collection menu moves to `/browse/`.
-- Gauges, bars and the update-date plot open the Docs modal. No summaries or source text appear on the dashboard.
+- Selecting a gauge opens its metric breakdown; selecting a bar filters to its records; selecting a plot point opens that document's metadata. The generic Docs URL dialog is replaced by data-specific detail panels.
 
 
 ## [docs-0.6.0] - 2026-10-23

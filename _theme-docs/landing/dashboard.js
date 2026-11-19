@@ -117,15 +117,18 @@
   function gauge(label,value,ratio,key){
     var progress=Number.isFinite(ratio);
     var style=progress?" style=\"--dash-ratio:"+Math.max(0,Math.min(1,ratio))*100+"%\"":"";
-    return '<button class="dash-gauge" type="button" data-gauge="'+esc(key)+'" aria-label="'+esc(label+" "+value+"; show details")+'">'+
-      '<span class="gauge-dial '+(progress?"":"neutral")+'"'+style+'><span class="gauge-number">'+esc(fmt(value))+'</span></span>'+
+    var display=typeof value==="number"?fmt(value):String(value);
+    return '<button class="dash-gauge" type="button" data-gauge="'+esc(key)+'" aria-label="'+esc(label+" "+display+"; show details")+'">'+
+      '<span class="gauge-dial '+(progress?"":"neutral")+'"'+style+'><span class="gauge-number">'+esc(display)+'</span></span>'+
       '<span class="gauge-label">'+esc(label)+'</span></button>';
   }
   function renderGauges(data){
     var docs=data.docs,central=data.central||{},list=docs.documents||[],colls=docs.collections||[];
-    var items=central.items?Object.values(central.items):[];
-    var missing=Array.isArray(central.not_in_central)?central.not_in_central.length:0;
-    var totalRefs=items.length+missing,coverage=totalRefs?items.length/totalRefs:NaN;
+    var centralAvailable=!!(central&&central.items&&typeof central.items==="object");
+    var missingAvailable=centralAvailable&&Array.isArray(central.not_in_central);
+    var items=centralAvailable?Object.values(central.items):[];
+    var missing=missingAvailable?central.not_in_central.length:null;
+    var totalRefs=missingAvailable?items.length+missing:0,coverage=totalRefs?items.length/totalRefs:NaN;
     var languages=languageCounts(),archives=archiveRows().length,pdfs=0;
     list.forEach(function(d){pdfs+=(d.pdf_languages||[]).length;});
     var labels=[
@@ -133,8 +136,8 @@
       ["COLLECTIONS",colls.length,NaN,"collections"],
       ["LANGUAGES",Object.keys(languages).length,NaN,"languages"],
       ["ARCHIVES",archives,NaN,"archives"],
-      ["LINKED REFS",items.length,coverage,"linked"],
-      ["UNMATCHED",missing,totalRefs?missing/totalRefs:NaN,"unmatched"],
+      ["LINKED REFS",centralAvailable?items.length:"—",coverage,"linked"],
+      ["UNMATCHED",missingAvailable?missing:"—",missingAvailable&&totalRefs?missing/totalRefs:NaN,"unmatched"],
       ["CURRENT PDFs",pdfs,NaN,"pdfs"]
     ];
     document.getElementById("docs-gauges").innerHTML=labels.map(function(x){return gauge(x[0],x[1],x[2],x[3]);}).join("");
@@ -233,10 +236,17 @@
       var rows=archives.map(function(item){return {primary:item.doc.id+" · "+item.doc.title,secondary:"ARCHIVE v"+String(item.archive.version||"—")+" · PDF LANGUAGES "+((item.archive.languages||[]).join(", ")||"—"),value:item.archive.date||"—",href:(item.doc.languages||[])[0]&&(item.doc.languages||[])[0].html};});
       showDetail("ARCHIVED EDITIONS",fmt(archives.length),"Archived edition metadata grouped by source document; dates, versions and available PDF languages.",rows);
     }else if(key==="linked"){
-      var counts=countBy(central,function(item){return item.kind;});
+      if(!current.central||!current.central.items||typeof current.central.items!=="object"){
+        showDetail("LINKED CATALOGUE REFERENCES","—","The central catalogue cache is unavailable; no zero count is inferred.",[]);
+        return;
+      }
       var rows=central.slice().sort(function(a,b){return String(a.id).localeCompare(String(b.id));}).map(function(item){return {primary:item.id+" · "+item.title,secondary:[item.kind,item.status,item.date_display].filter(Boolean).join("  ·  "),value:item.page?"PAGE":"—"};});
       showDetail("LINKED CATALOGUE REFERENCES",fmt(central.length),"Matched catalogue records, including ID, title, record kind, status and date.",rows);
     }else if(key==="unmatched"){
+      if(!current.central||!Array.isArray(current.central.not_in_central)){
+        showDetail("UNMATCHED REFERENCES","—","The central catalogue cache is unavailable; no zero count is inferred.",[]);
+        return;
+      }
       var rows=missing.map(function(id){return {primary:id,secondary:"REFERENCED BY DOCS · NOT FOUND IN THE CENTRAL CACHE",value:"UNMATCHED"};});
       showDetail("UNMATCHED REFERENCES",fmt(missing.length),"Referenced catalogue IDs for which this Docs cache has no matching central record.",rows);
     }else if(key==="pdfs"){
@@ -282,9 +292,13 @@
     renderBars("docs-by-status","status",Object.keys(statuses).map(function(k){return {key:k,label:k,value:statuses[k]};}));
     var languages=languageCounts();
     renderBars("docs-by-language","language",Object.keys(languages).map(function(k){return {key:k,label:k,value:languages[k]};}));
-    var centralList=central.items&&typeof central.items==="object"?Object.values(central.items):[];
-    var kinds=countBy(centralList,function(x){return x.kind;});
-    renderBars("central-by-kind","kind",Object.keys(kinds).map(function(k){return {key:k,label:k,value:kinds[k]};}));
+    if(central.items&&typeof central.items==="object"){
+      var centralList=Object.values(central.items);
+      var kinds=countBy(centralList,function(x){return x.kind;});
+      renderBars("central-by-kind","kind",Object.keys(kinds).map(function(k){return {key:k,label:k,value:kinds[k]};}));
+    }else{
+      document.getElementById("central-by-kind").innerHTML='<div class="dash-detail-empty">CENTRAL CACHE UNAVAILABLE</div>';
+    }
     var years=Object.create(null);
     archiveRows().forEach(function(item){if(item.year)years[item.year]=(years[item.year]||0)+1;});
     renderBars("archive-by-year","archive-year",Object.keys(years).map(function(k){return {key:k,label:k,value:years[k]};}));

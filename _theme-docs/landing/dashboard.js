@@ -101,12 +101,9 @@
       parts.push('<text class="dash-axis" x="'+(L-12)+'" y="'+(y+3.5).toFixed(1)+'" text-anchor="end">'+esc(c.label.toUpperCase())+'</text>');
     });
     var startYear=new Date(min).getUTCFullYear(),endYear=new Date(max).getUTCFullYear();
-    var years=[];
-    for(var y=startYear;y<=endYear;y++){
-      if(years.length>7)break;
-      years.push(y);
-    }
-    if(years.length===1)years=[startYear,endYear];
+    var years=[],yearStep=Math.max(1,Math.ceil((endYear-startYear)/6));
+    for(var y=startYear;y<=endYear;y+=yearStep) years.push(y);
+    if(years[years.length-1]!==endYear) years.push(endYear);
     years.forEach(function(year){
       var date=Date.UTC(year,0,1),x=L+(date-min)/(max-min)*plotW;
       if(x<L||x>W-R)return;

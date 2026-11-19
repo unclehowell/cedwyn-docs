@@ -122,8 +122,10 @@ python3 _theme-docs/release.py <collection>/<document> --to X.Y.Z [--date YYYY-M
     read-only `data/central.json` cache; it shows counts and metadata only (documents, collections, languages, archive editions,
     central-catalogue matches and unmatched referenced IDs, category/status bars, language bars, kind bars and update-date plot).
     The central-cache timestamp is shown separately from the docs-index build timestamp. No document summaries, source passages,
-    transcripts, or promotional/explanatory text appear on the dashboard. Selecting any gauge, bar or plot point opens the Docs
-    modal with the fixed address `https://bucklerfamily.estate/docs/`. Missing central metadata must not be treated as zero records.
+    transcripts, or promotional/explanatory text appear on the dashboard. Selecting a gauge opens a metric-specific detail panel
+    with its underlying metadata and record breakdown; selecting a bar filters to the records represented by that bar; selecting
+    a plot point opens that document's metadata. Document entries may link to their exact HTML build. No generic fixed Docs URL
+    is shown in place of the selected data. Missing central metadata must not be treated as zero records.
     The former collection landing menu lives at `/browse/`; its links remain the route into the collection and document menus.
 7.4 Collection pages use one band per document group (the part of the document id before `_`, label from `groups`) with a
     button per document. Document pages show the document title and one band per language: a green **Latest** button (HTML)

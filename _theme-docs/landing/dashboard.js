@@ -84,7 +84,8 @@
   }
   function sortByDate(rows){
     return rows.slice().sort(function(a,b){
-      return String((b.doc&&b.doc.updated)||(b.doc&&b.doc.date)||"").localeCompare(String((a.doc&&a.doc.updated)||(a.doc&&a.doc.date)||""));
+      var left=a.doc||a,right=b.doc||b;
+      return String((right&&right.updated)||(right&&right.date)||"").localeCompare(String((left&&left.updated)||(left&&left.date)||""));
     });
   }
   function detailRow(row){

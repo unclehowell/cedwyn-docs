@@ -28,7 +28,7 @@ Record
 
 **Quotation:** “Can you please note that the Council meeting on 22 October will now be held remotely only” (Clerk, 16 Oct 2026, `M22 <#m22>`__).
 
-**Proves:** What was sent and received, by whom and on what dates, as held in Sion’s mailbox.
+**Proves:** What was sent and received, by whom and on what dates, as held in the project mailbox.
 
 **Does not prove:** That any statement inside an email is true; that the mailbox holds every message (letters, calls and other addresses are outside it); any motive.
 
